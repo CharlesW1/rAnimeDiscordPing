@@ -17,8 +17,21 @@ jobs:
         run: sudo apt purge google-chrome-stable
       - name: Remove default Chromium
         run: sudo apt purge chromium-browser
-      - name: Install a new Chromium
-        run: sudo apt install -y chromium-browser
+      # - name: Install a new Chromium
+      #   run: sudo apt install -y chromium-browser
+      - name: Get Chromium version
+        run: chromium-browser --version
+
+      - name: Set up ChromeDriver
+        run: |
+          CHROME_VERSION=$(chromium-browser --version | grep -oP "\d+\.\d+\.\d+" | head -1)
+          DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r ".channels.Stable.version")
+          echo "Using ChromeDriver version $DRIVER_VERSION"
+          wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          chmod +x /usr/local/bin/chromedriver
+
       - name: Install all necessary packages
         run: pip install requests beautifulsoup4 pandas webdriver-manager selenium
       - name: Run the scraping script

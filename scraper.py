@@ -7,8 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 # selenium 4
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 
 # Setup headless Chrome
 chrome_options = Options()
@@ -28,7 +27,7 @@ chrome_options.add_argument(
     "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
 )
 
-driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
+driver = webdriver.Chrome(service=Service("/usr/local/bin/chromedriver"), options=chrome_options)
 
 try:
     # Go to Reddit search page
@@ -43,6 +42,7 @@ try:
 
     # Find first post title link
     posts = driver.find_elements(By.CSS_SELECTOR, '[data-testid="search-sdui-post"] [data-testid="post-title"]')
+    print(posts)
     if not posts:
         raise Exception("No posts found.")
 
