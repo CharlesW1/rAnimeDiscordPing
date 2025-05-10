@@ -1,19 +1,19 @@
 import time
 import os
 import requests
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+# selenium 4
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Setup headless Chrome
-chrome_service = Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
 chrome_options = Options()
 options = [
-    "--headless",
+    "--headless=new",
     "--disable-gpu",
     "--window-size=1920,1200",
     "--ignore-certificate-errors",
@@ -24,7 +24,11 @@ options = [
 for option in options:
     chrome_options.add_argument(option)
 
-driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
+chrome_options.add_argument(
+    "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+)
+
+driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
 
 try:
     # Go to Reddit search page
@@ -33,9 +37,9 @@ try:
     time.sleep(3)  # Let the page load a bit
 
     # Scroll to load posts
-    for _ in range(5):
+    for _ in range(2):
         driver.execute_script("window.scrollBy(0, window.innerHeight);")
-        time.sleep(1.5)
+        time.sleep(.5)
 
     # Find first post title link
     posts = driver.find_elements(By.CSS_SELECTOR, '[data-testid="search-sdui-post"] [data-testid="post-title"]')
@@ -43,10 +47,10 @@ try:
         raise Exception("No posts found.")
 
     posts[0].click()
-    time.sleep(5)  # Wait for post to load
+    time.sleep(1)  # Wait for post to load
 
     # Try to find image
-    image = driver.find_element(By.CSS_SELECTOR, 'img[alt*="Image"]')  # fallback selector
+    image = driver.find_element(By.CSS_SELECTOR, 'img#post-image')  # fallback selector
     image_url = image.get_attribute('src')
     print("Found image:", image_url)
 
